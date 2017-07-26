@@ -6,6 +6,7 @@ Loss functions.
 """
 
 import numpy as np
+from numpy import log
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 
@@ -106,11 +107,14 @@ class BinaryCrossEntropyError(Error):
         self.errorString = 'bce'
 
     def calculateError(self, target, output):
-        return np.sum(target*log(output) + (1-target)*log(1-output))
+        return np.sum(target*log(output) + np.subtract(1,target)*log(np.subtract(1,output)))
         
     def calculateDerivative(self, target, output):
         # BCEPrime = -target/output + (1-target)/(1-output)
-        return -target/output + (1-target)/(1-output)
+        opt=output.reshape((output.size,1))
+        tt = target.reshape((target.size,1))
+        return -tt/opt + np.subtract(1,tt)/np.subtract(1,opt)
+        # return -tt / opt + (np.full(tt.shape,1)-tt) / (np.full(tt.shape,1)-opt)
  
 
 class CrossEntropyError(Error):

@@ -3,11 +3,12 @@
 """
 Activation functions which can be used within neurons.
 """
-
+import numpy as np
 from numpy import exp
 from numpy import divide
 from numpy import ones
 from numpy import asarray
+from numpy import subtract
 
 
 class Activation:
@@ -64,11 +65,16 @@ class Activation:
     @staticmethod
     def softmax(netOutput):
         # Here you have to code the softmax function
-        pass
+        temp = 0
+        for i in range(netOutput.size):
+            temp += exp(1.0*netOutput[i])
+        return np.array([exp(1.0*netOutput[x])/temp for x in range(netOutput.size)])
+
         
     @staticmethod
     def softmaxPrime(netOutput):
         # Here you have to code the softmax function
+        return netOutput * subtract(1.0 , netOutput)
         pass
         
     @staticmethod

@@ -50,15 +50,21 @@ class LogisticLayer():
         self.nIn = nIn
         self.nOut = nOut
 
-        self.inp = np.ndarray((nIn+1, 1))
-        self.inp[0] = 1
+        if not isClassifierLayer:
+         self.inp = np.ndarray((nIn+1, 1))
+         self.inp[0] = 1
+        else :
+         self.inp = np.ndarray((nIn, 1))
         self.outp = np.ndarray((nOut, 1))
         self.deltas = np.zeros((nOut, 1))
 
         # You can have better initialization here
         if weights is None:
             rns = np.random.RandomState(int(time.time()))
-            self.weights = rns.uniform(size=(nIn + 1, nOut))-0.5
+            if not isClassifierLayer:
+             self.weights = rns.uniform(size=(nIn + 1, nOut))-0.5
+            else:
+             self.weights = rns.uniform(size=(nIn, nOut)) - 0.5
         else:
             assert(weights.shape == (nIn + 1, nOut))
             self.weights = weights
@@ -125,7 +131,7 @@ class LogisticLayer():
         # Or even more general: doesn't care which activation function is used
         # dado: derivative of activation function w.r.t the output
         dado = self.activationDerivative(self.outp)
-        self.deltas = (dado * np.dot(next_derivatives, next_weights))
+        self.deltas = (dado * np.dot(next_weights,next_derivatives))
 
         # Or you can explicitly calculate the derivatives for two cases
         # Page 40 Back-propagation slides
@@ -139,6 +145,8 @@ class LogisticLayer():
         # the other is computeOutputLayerDerivative or such.
         return self.deltas
 
+
+
     def updateWeights(self, learningRate):
         """
         Update the weights of the layer
@@ -146,10 +154,10 @@ class LogisticLayer():
 
         # weight updating as gradient descent principle
         for neuron in range(0, self.nOut):
-            self.weights[:, neuron] -= (learningRate *
+            self.weights[:, neuron] -= ((learningRate *
                                         self.deltas[neuron] *
-                                        self.inp)
+                                        self.inp)).reshape((self.weights.shape[0],))
         
 
     def _fire(self, inp):
-        return self.activation(np.dot(inp, self.weights))
+        return self.activation(np.dot(self.weights.T,inp))
